@@ -95,7 +95,7 @@ def log_distance(node_id, last_node_id, distance, path_id, start_frac, end_frac)
 		seen_nodes.add(node_id)
 
 
-print "Finding paths within %d metres of the origin station..." % STATION_RADIUS
+#print "Finding paths within %d metres of the origin station..." % STATION_RADIUS
 # Find the details of paths which pass within STATION_RADIUS metres of the origin point.
 # ST_Line_Locate_Point gives us a value between 0 and 1 indicating how far along the linestring
 # the closest point to the origin point is.
@@ -117,7 +117,7 @@ for (path_id, length, node1_id, node2_id, distance_along) in cur:
 # Now repeat the process at the destination end. When we perform database queries to find
 # onward paths to follow from a particular node, we'll also check the node on our list of candidate
 # destination nodes.
-print "Finding paths within %d metres of the destination station..." % STATION_RADIUS
+#print "Finding paths within %d metres of the destination station..." % STATION_RADIUS
 cur.execute("""
 	SELECT id, length, node1_id, node2_id, ST_Line_Locate_Point(linestring, %s) AS distance_along
 	FROM paths
@@ -169,7 +169,7 @@ while True:
 		# we have found a minimal route to that destination and thus arrived at our answer.
 		break  # in either case, we can stop iterating
 
-	print "following paths from node %s (%s metres from origin)" % (current_node, current_distance)
+	#print "following paths from node %s (%s metres from origin)" % (current_node, current_distance)
 
 	# Move current_node from seen_nodes to visited_nodes, as we can be sure it's a minimal route
 	seen_nodes.remove(current_node)
@@ -213,7 +213,7 @@ if current_node == -1:
 	route_geom = None  # assemble the geometry for the full route as a 'multilinestring' geometry type in this variable
 	while current_node is not None:
 		(path_id, next_node, start_frac, end_frac) = path_to_node[current_node]
-		print "%d to %d via path %d" % (current_node, (next_node or 0), path_id)
+		#print "%d to %d via path %d" % (current_node, (next_node or 0), path_id)
 		if start_frac == end_frac:
 			# avoid adding single points to the accumulated geometry, as this turns it into
 			# a geometrycollection rather than a multilinestring
@@ -246,10 +246,10 @@ if current_node == -1:
 
 	# condense route_geom into a single linestring and output it as KML
 	cur.execute("""
-		SELECT ST_AsKML(ST_LineMerge(ST_CollectionExtract(%s, 2)))
+		SELECT ST_AsGeoJSON(ST_LineMerge(ST_CollectionExtract(%s, 2)))
 	""", (route_geom,))
-	(kml, ) = cur.fetchone()
-	print kml
+	(json, ) = cur.fetchone()
+	print json
 else:
 	print "Exhausted search without finding destination point"
 
