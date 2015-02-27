@@ -234,7 +234,7 @@ if current_node == -1:
 			# endpoints around, then reverse the result
 			cur.execute("""
 				SELECT ST_Collect(
-					ST_Reverse(ST_Line_Substring(ST_REVERSE(linestring), %s, %s)),
+					ST_Reverse(ST_Line_Substring(linestring, %s, %s)),
 					%s
 				)
 				FROM paths
